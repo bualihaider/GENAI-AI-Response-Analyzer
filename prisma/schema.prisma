@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Experiment {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String?
+  description String?
+  prompt      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Parameter ranges tested
+  temperatureMin Float?
+  temperatureMax Float?
+  topPMin        Float?
+  topPMax        Float?
+  maxTokensMin   Int?
+  maxTokensMax   Int?
+  
+  // Results
+  results       Response[]
+  totalRuns     Int        @default(0)
+}
+
+model Response {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  experimentId String   @db.ObjectId
+  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  
+  // Generation parameters
+  temperature  Float
+  topP         Float
+  maxTokens    Int
+  
+  // Generated content
+  content      String
+  
+  // Quality metrics
+  coherence    Float?
+  completeness Float?
+  readability  Float?
+  relevance    Float?
+  overallScore Float?
+  
+  // Metadata
+  generatedAt  DateTime @default(now())
+  model        String   @default("gpt-3.5-turbo")
+  tokensUsed   Int?
+  generationTime Float? 
+  
+  metricCalculations MetricCalculation[]
+}
+
+model MetricCalculation {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  responseId  String   @db.ObjectId
+  response    Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  
+  metricType  String   
+  score       Float
+  details     String?  
+  calculatedAt DateTime @default(now())
+}
