@@ -9,6 +9,10 @@ import { PrismaClient } from '@prisma/client';
 import experimentRoutes from './routes/experiments';
 import generationRoutes from './routes/generation';
 import exportRoutes from './routes/export';
+import healthRoutes, { setCronService } from './routes/health';
+
+// Import services
+import { CronService } from './services/cronService';
 
 // Load environment variables
 dotenv.config();
@@ -16,6 +20,9 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3001;
 const prisma = new PrismaClient();
+
+// Initialize cron service to keep server alive
+const cronService = new CronService(`http://localhost:${port}`);
 
 // Middleware
 app.use(helmet());
@@ -31,15 +38,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/experiments', experimentRoutes);
 app.use('/api/generate', generationRoutes);
 app.use('/api/export', exportRoutes);
-
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'healthy', 
-    timestamp: new Date().toISOString(),
-    version: '1.0.0'
-  });
-});
+app.use('/api', healthRoutes);
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -58,12 +57,14 @@ app.use('*', (req, res) => {
 // Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('Shutting down gracefully...');
+  cronService.stop();
   await prisma.$disconnect();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
   console.log('Shutting down gracefully...');
+  cronService.stop();
   await prisma.$disconnect();
   process.exit(0);
 });
@@ -71,6 +72,13 @@ process.on('SIGTERM', async () => {
 app.listen(port, () => {
   console.log(`🚀 Backend server running on port ${port}`);
   console.log(`📊 Health check: http://localhost:${port}/api/health`);
+  console.log(`📊 Detailed health check: http://localhost:${port}/api/health/detailed`);
+  
+  // Start cron service to keep server alive
+  cronService.start();
+  
+  // Set cron service reference for health routes
+  setCronService(cronService);
 });
 
 export default app;
