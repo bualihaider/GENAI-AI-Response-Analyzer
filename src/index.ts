@@ -22,7 +22,7 @@ const port = process.env.PORT || 3001;
 const prisma = new PrismaClient();
 
 // Initialize cron service to keep server alive
-const cronService = new CronService(`http://localhost:${port}`);
+const cronService = new CronService(process.env.SERVER_URL || `http://localhost:${port}`);
 
 // Middleware
 app.use(helmet());
