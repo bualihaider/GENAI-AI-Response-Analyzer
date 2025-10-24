@@ -1,49 +1,54 @@
-# AI Response Quality Analyzer - Frontend
+# AI Response Quality Analyzer - Backend
 
-A modern React application built with Next.js 15 that provides an intuitive interface for experimenting with LLM parameters and analyzing response quality through custom metrics.
+A robust Node.js API server built with Express.js and TypeScript that provides comprehensive LLM response generation, quality analysis, and experiment management capabilities.
 
 ## 🎯 Overview
 
-The frontend is a sophisticated single-page application that enables users to:
-- Configure LLM parameters through interactive controls
-- Generate multiple AI responses with different parameter combinations
-- Visualize quality metrics through interactive charts and dashboards
-- Manage experiment history and export results
-- Analyze response quality across multiple dimensions
+The backend is a sophisticated API server that handles:
+- LLM response generation with Google Gemini integration
+- Custom quality metrics calculation
+- Experiment data management and storage
+- Real-time response analysis
+- Data export in multiple formats
+- Server health monitoring and maintenance
 
 ## 🛠️ Technology Stack
 
 ### Core Technologies
-- **Next.js 15** - React framework with App Router
+- **Node.js 18+** - JavaScript runtime
+- **Express.js 4.x** - Web application framework
 - **TypeScript 5.x** - Type-safe development
-- **Tailwind CSS 3.x** - Utility-first styling
-- **React 18** - Component-based UI library
+- **MongoDB 7.x** - NoSQL database
+- **Prisma 5.x** - Database ORM
 
 ### Key Libraries
-- **Recharts 2.x** - Data visualization and charts
-- **Heroicons 2.x** - Icon library
-- **Headless UI** - Accessible UI components
-- **React Hook Form** - Form management
-- **React Markdown** - Markdown rendering
+- **Google Generative AI SDK** - LLM API integration
+- **Node-cron** - Scheduled task management
+- **Express Rate Limit** - API rate limiting
+- **CORS** - Cross-origin resource sharing
+- **Helmet** - Security middleware
+- **Morgan** - HTTP request logging
 
 ### Development Tools
 - **ESLint** - Code linting
 - **Prettier** - Code formatting
-- **TypeScript** - Type checking
-- **Next.js Dev Server** - Development server
+- **Nodemon** - Development server
+- **Prisma Studio** - Database management GUI
+- **Jest** - Testing framework
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 - **Node.js 18+** - [Download](https://nodejs.org/)
 - **npm 8+** - Comes with Node.js
-- **Backend API** - Must be running on port 3001 with Google Gemini integration
+- **MongoDB** - Local installation or MongoDB Atlas account
+- **Google Gemini API Key** - [Get API Key](https://ai.google.dev/)
 
 ### Installation
 
-1. **Navigate to frontend directory**
+1. **Navigate to backend directory**
    ```bash
-   cd frontend
+   cd backend
    ```
 
 2. **Install dependencies**
@@ -52,132 +57,205 @@ The frontend is a sophisticated single-page application that enables users to:
    ```
 
 3. **Set up environment variables**
-   Create `.env.local` file:
+   Create `.env` file:
    ```env
-   NEXT_PUBLIC_API_URL=http://localhost:3001
-   NEXT_PUBLIC_APP_NAME="AI Response Quality Analyzer"
-   NEXT_PUBLIC_DEBUG=true
+   # Database Configuration
+   DATABASE_URL="mongodb://localhost:27017/ai-response-analyzer"
+   
+   # Server Configuration
+   PORT=3001
+   NODE_ENV=development
+   FRONTEND_URL=http://localhost:3000
+   SERVER_URL=http://localhost:3001
+   
+   
+   # Google Gemini Configuration
+   GEMINI_API_KEY=your_gemini_api_key_here
+   GEMINI_MODEL=gemini-pro
    ```
 
-4. **Start development server**
+4. **Set up database**
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
+
+5. **Start development server**
    ```bash
    npm run dev
    ```
 
-5. **Open application**
-   Navigate to [http://localhost:3000](http://localhost:3000)
+6. **Verify installation**
+   Test API health: [http://localhost:3001/api/health](http://localhost:3001/api/health)
 
 ## 📁 Project Structure
 
 ```
-frontend/
+backend/
 ├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── api/               # API routes (proxy to backend)
-│   │   │   ├── experiments/   # Experiment management
-│   │   │   ├── export/        # Data export
-│   │   │   └── generate/      # Response generation
-│   │   ├── globals.css        # Global styles
-│   │   ├── layout.tsx         # Root layout component
-│   │   └── page.tsx           # Main application page
-│   ├── components/            # React components
-│   │   ├── Header.tsx         # Navigation and branding
-│   │   ├── PromptInput.tsx    # Prompt configuration
-│   │   ├── ParameterControls.tsx # LLM parameter sliders
-│   │   ├── ResponseDisplay.tsx # Results visualization
-│   │   └── ExperimentHistory.tsx # Experiment management
-│   └── types/                 # TypeScript definitions
-│       └── index.ts           # Shared type definitions
-├── public/                    # Static assets
-│   ├── icons/                # App icons
-│   └── images/               # Images and graphics
-├── package.json              # Dependencies and scripts
-├── next.config.ts            # Next.js configuration
-├── tailwind.config.js        # Tailwind CSS configuration
-├── tsconfig.json             # TypeScript configuration
-└── README.md                 # This file
+│   ├── routes/                # API route handlers
+│   │   ├── experiments.ts    # Experiment CRUD operations
+│   │   ├── generation.ts     # Response generation logic
+│   │   ├── export.ts         # Data export functionality
+│   │   └── health.ts         # Health check endpoint
+│   ├── services/             # Business logic services
+│   │   ├── llmService.ts     # Google Gemini API integration
+│   │   ├── qualityMetrics.ts # Quality calculation engine
+│   │   └── cronService.ts    # Background task processing
+│   ├── types/                # TypeScript type definitions
+│   │   └── index.ts          # Shared type definitions
+│   ├── utils/                # Utility functions
+│   │   ├── validation.ts     # Input validation helpers
+│   │   ├── logger.ts         # Logging utilities
+│   │   └── constants.ts      # Application constants
+├── prisma/                  # Database schema and migrations
+│   └── schema.prisma        # Prisma schema definition
+├── dist/                    # Compiled JavaScript output
+├── package.json            # Dependencies and scripts
+├── tsconfig.json           # TypeScript configuration
+├── .env.example            # Environment variables template
+└── README.md               # This file
 ```
 
-## 🎨 Component Architecture
+## 🔧 API Architecture
 
-### Core Components
+### Route Structure
 
-#### Header.tsx
-- **Purpose**: Navigation and application branding
-- **Features**: Responsive navigation, theme toggle, user info
-- **Props**: None (uses context for state)
+#### Experiments API (`/api/experiments`)
+- `GET /` - List all experiments
+- `GET /:id` - Get specific experiment
+- `POST /` - Create new experiment
+- `PATCH /:id` - Update experiment metadata
+- `DELETE /:id` - Delete experiment and responses
 
-#### PromptInput.tsx
-- **Purpose**: Prompt configuration and experiment setup
-- **Features**: 
-  - Text area for prompt input
-  - Real-time validation
-  - Character count
-  - Auto-save functionality
-- **Props**: `onPromptChange`, `initialPrompt`
+#### Generation API (`/api/generate`)
+- `POST /` - Generate responses with parameter combinations
+- `GET /status/:id` - Check generation status
+- `POST /cancel/:id` - Cancel ongoing generation
 
-#### ParameterControls.tsx
-- **Purpose**: LLM parameter configuration
+#### Export API (`/api/export`)
+- `POST /` - Export experiment data
+- `GET /formats` - List available export formats
+- `GET /download/:id` - Download exported file
+
+#### Health API (`/api/health`)
+- `GET /` - Health check endpoint
+- `GET /metrics` - Server metrics
+- `GET /status` - Detailed status information
+
+### Service Layer Architecture
+
+#### LLM Service (`llmService.ts`)
+- **Purpose**: Google Gemini API integration and response generation
 - **Features**:
-  - Interactive sliders for temperature, top-p, max tokens
-  - Real-time value display
-  - Range validation
-  - Preset configurations
-- **Props**: `onParameterChange`, `initialParameters`
+  - Multiple model support (gemini-pro, gemini-pro-vision)
+  - Retry logic with exponential backoff
+  - Rate limiting and error handling
+  - Response streaming
+  - Cost tracking
 
-#### ResponseDisplay.tsx
-- **Purpose**: Results visualization and analysis
+#### Quality Metrics Service (`qualityMetrics.ts`)
+- **Purpose**: Custom quality calculation engine
 - **Features**:
-  - Interactive charts (radar, bar, line)
-  - Response comparison
-  - Metric breakdown
-  - Export functionality
-- **Props**: `responses`, `experimentId`
+  - Four quality metrics (Coherence, Completeness, Readability, Relevance)
+  - Detailed algorithm implementation
+  - Batch processing capabilities
+  - Metric validation and normalization
 
-#### ExperimentHistory.tsx
-- **Purpose**: Past experiment management
+#### Cron Service (`cronService.ts`)
+- **Purpose**: Background task processing
 - **Features**:
-  - Paginated experiment list
-  - Search and filtering
-  - Experiment details modal
-  - Bulk operations
-- **Props**: `experiments`, `onExperimentSelect`
+  - Server health monitoring
+  - Database cleanup tasks
+  - Performance metrics collection
+  - Automated maintenance
 
-## 🎨 UI/UX Design
+## 🗄️ Database Schema
 
-### Design System
+### Core Models
 
-#### Color Palette
-- **Primary**: `#3B82F6` (Blue) - Trust and reliability
-- **Secondary**: `#6B7280` (Gray) - Neutral and balanced
-- **Success**: `#10B981` (Green) - Positive feedback
-- **Warning**: `#F59E0B` (Orange) - Caution
-- **Error**: `#EF4444` (Red) - Errors and critical actions
-- **Background**: `#F9FAFB` (Light Gray) - Clean background
+#### Experiment Model
+```typescript
+model Experiment {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  description   String?
+  prompt        String
+  temperatureMin Float
+  temperatureMax Float
+  topPMin       Float
+  topPMax       Float
+  maxTokensMin  Int
+  maxTokensMax  Int
+  totalRuns     Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  responses     Response[]
+}
+```
 
-#### Typography
-- **Primary Font**: Inter (system font fallback)
-- **Monospace**: JetBrains Mono (for code/technical content)
-- **Scale**: 10px, 12px, 14px, 16px, 18px, 20px, 24px
+#### Response Model
+```typescript
+model Response {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  experimentId String   @db.ObjectId
+  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  temperature  Float
+  topP         Float
+  maxTokens    Int
+  content      String
+  coherence    Float?
+  completeness Float?
+  readability  Float?
+  relevance    Float?
+  overallScore Float?
+  generatedAt  DateTime @default(now())
+  model        String   @default("gpt-3.5-turbo")
+  tokensUsed   Int?
+  generationTime Float?
+  metricCalculations MetricCalculation[]
+}
+```
 
-#### Spacing System
-- **Micro**: 4px, 8px
-- **Small**: 12px, 16px
-- **Medium**: 24px, 32px
-- **Large**: 48px, 64px
+#### Metric Calculation Model
+```typescript
+model MetricCalculation {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  responseId  String   @db.ObjectId
+  response    Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  metricType  String
+  score       Float
+  details     String?
+  calculatedAt DateTime @default(now())
+}
+```
 
-### Responsive Design
+### Database Operations
 
-#### Breakpoints
-- **Mobile**: 320px - 768px
-- **Tablet**: 768px - 1024px
-- **Desktop**: 1024px+
+#### Prisma Client Usage
+```typescript
+// Create experiment
+const experiment = await prisma.experiment.create({
+  data: {
+    prompt: "Explain machine learning",
+    temperatureMin: 0.1,
+    temperatureMax: 0.9,
+    totalRuns: 5
+  }
+});
 
-#### Responsive Strategies
-- **Mobile-First**: Design for mobile, enhance for larger screens
-- **Flexible Layouts**: CSS Grid and Flexbox
-- **Touch-Friendly**: 44px minimum touch targets
-- **Content Priority**: Most important content visible on small screens
+// Get experiment with responses
+const experimentWithResponses = await prisma.experiment.findUnique({
+  where: { id: experimentId },
+  include: {
+    responses: {
+      include: {
+        metricCalculations: true
+      }
+    }
+  }
+});
+```
 
 ## 🔧 Development
 
@@ -185,257 +263,183 @@ frontend/
 
 ```bash
 # Development
-npm run dev          # Start development server
-npm run build        # Build for production
+npm run dev          # Start development server with hot reload
+npm run build        # Compile TypeScript to JavaScript
 npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run lint:fix     # Fix ESLint errors
 
-# Type checking
-npm run type-check   # Run TypeScript compiler
-npm run type-check:watch # Watch mode for type checking
+# Database
+npm run db:generate  # Generate Prisma client
+npm run db:push      # Push schema changes to database
+npm run db:studio    # Open Prisma Studio
+npm run db:seed      # Seed database with test data
 ```
 
 ### Development Workflow
 
-1. **Start backend server** (in separate terminal)
+1. **Start MongoDB** (if using local instance)
    ```bash
-   cd ../backend
+   # macOS with Homebrew
+   brew services start mongodb-community
+   
+   # Or start manually
+   mongod --dbpath /usr/local/var/mongodb
+   ```
+
+2. **Start development server**
+   ```bash
    npm run dev
    ```
 
-2. **Start frontend development server**
+3. **Open Prisma Studio** (optional)
    ```bash
-   npm run dev
+   npm run db:studio
    ```
 
-3. **Open browser** to [http://localhost:3000](http://localhost:3000)
+4. **Make changes** - Server will restart automatically
 
-4. **Make changes** - Hot reload will update automatically
+## 📊 Quality Metrics Implementation
 
-### Code Standards
+### Metric Calculation Engine
 
-#### TypeScript
-- **Strict Mode**: Enabled for type safety
-- **No Implicit Any**: All types must be explicit
-- **Interface Definitions**: All props and state must be typed
-- **Import Organization**: Grouped imports (React, libraries, local)
+The quality metrics service implements four sophisticated algorithms:
 
-#### Component Guidelines
-- **Functional Components**: Use React hooks
-- **Props Interface**: Define interface for all props
-- **Default Props**: Use default parameters
-- **Error Boundaries**: Wrap components in error boundaries
-- **Accessibility**: Include ARIA labels and keyboard navigation
-
-#### Styling Guidelines
-- **Tailwind Classes**: Use utility classes
-- **Custom CSS**: Only when Tailwind doesn't provide the needed style
-- **Responsive Design**: Mobile-first approach
-- **Dark Mode**: Support for dark theme (future enhancement)
-
-## 📊 State Management
-
-### Local State
-- **useState**: Component-level state
-- **useEffect**: Side effects and lifecycle
-- **useCallback**: Memoized functions
-- **useMemo**: Memoized values
-
-### Global State
-- **Context API**: For theme and user preferences
-- **Local Storage**: For persistent settings
-- **URL State**: For experiment sharing
-
-### Data Flow
+#### Coherence Metric
+```typescript
+function calculateCoherence(text: string): number {
+  const sentenceStructure = analyzeSentenceStructure(text);
+  const logicalFlow = detectLogicalFlow(text);
+  const consistency = checkConsistency(text);
+  const paragraphStructure = analyzeParagraphStructure(text);
+  
+  return (
+    sentenceStructure * 0.3 +
+    logicalFlow * 0.3 +
+    consistency * 0.2 +
+    paragraphStructure * 0.2
+  );
+}
 ```
-User Input → Component State → API Call → Backend → Database
-     ↑                                                      ↓
-     └── UI Update ← State Update ← Response Processing ←────┘
+
+#### Completeness Metric
+```typescript
+function calculateCompleteness(prompt: string, response: string): number {
+  const questionAnswering = analyzeQuestionAnswering(prompt, response);
+  const topicCoverage = analyzeTopicCoverage(prompt, response);
+  const detailLevel = analyzeDetailLevel(response);
+  const conclusion = detectConclusion(response);
+  
+  return (
+    questionAnswering * 0.4 +
+    topicCoverage * 0.3 +
+    detailLevel * 0.2 +
+    conclusion * 0.1
+  );
+}
+```
+
+#### Readability Metric
+```typescript
+function calculateReadability(text: string): number {
+  const sentenceLength = analyzeSentenceLength(text);
+  const wordComplexity = analyzeWordComplexity(text);
+  const paragraphLength = analyzeParagraphLength(text);
+  const passiveVoice = detectPassiveVoice(text);
+  
+  return (
+    sentenceLength * 0.3 +
+    wordComplexity * 0.3 +
+    paragraphLength * 0.2 +
+    passiveVoice * 0.2
+  );
+}
+```
+
+#### Relevance Metric
+```typescript
+function calculateRelevance(prompt: string, response: string): number {
+  const keywordOverlap = calculateKeywordOverlap(prompt, response);
+  const topicAlignment = calculateTopicAlignment(prompt, response);
+  const contextPreservation = analyzeContextPreservation(prompt, response);
+  const offTopicDetection = detectOffTopicContent(prompt, response);
+  
+  return (
+    keywordOverlap * 0.3 +
+    topicAlignment * 0.3 +
+    contextPreservation * 0.2 +
+    offTopicDetection * 0.2
+  );
+}
 ```
 
 ## 🔌 API Integration
 
-### Backend Communication
-- **Base URL**: `NEXT_PUBLIC_API_URL` environment variable
-- **API Client**: Native fetch API for Google Gemini backend communication
-- **Error Handling**: Try-catch with user-friendly messages
-- **Loading States**: Skeleton screens and progress indicators
+### Google Gemini Integration
 
-### API Endpoints Used
-- `GET /api/experiments` - Fetch experiment history
-- `POST /api/generate` - Generate new responses
-- `POST /api/export` - Export experiment data
-- `GET /api/health` - Health check
+#### LLM Service Implementation
+```typescript
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-### Error Handling Strategy
-- **Network Errors**: Retry with exponential backoff
-- **API Errors**: Display user-friendly error messages
-- **Validation Errors**: Show field-specific errors
-- **Fallback UI**: Graceful degradation for failed requests
+class LLMService {
+  private genAI: GoogleGenerativeAI;
 
-## 🧪 Testing
+  constructor() {
+    this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+  }
 
-### Testing Strategy
-- **Unit Tests**: Component testing with React Testing Library
-- **Integration Tests**: API integration testing
-- **E2E Tests**: Full user workflow testing (future)
-- **Visual Tests**: Screenshot testing for UI consistency
+  async generateResponse(prompt: string, parameters: GenerationParameters): Promise<LLMResponse> {
+    try {
+      const model = this.genAI.getGenerativeModel({ 
+        model: parameters.model || 'gemini-pro',
+        generationConfig: {
+          temperature: parameters.temperature,
+          topP: parameters.topP,
+          maxOutputTokens: parameters.maxTokens,
+        }
+      });
 
-### Running Tests
-```bash
-npm test              # Run all tests
-npm run test:watch    # Watch mode
-npm run test:coverage # Coverage report
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      
+      return {
+        content: response.text(),
+        tokensUsed: response.usageMetadata?.totalTokenCount || 0,
+        model: parameters.model || 'gemini-pro',
+        generationTime: Date.now() - startTime
+      };
+    } catch (error) {
+      throw new LLMServiceError('Failed to generate response', error);
+    }
+  }
+}
 ```
 
-### Test Structure
+#### Error Handling and Retry Logic
+```typescript
+async generateWithRetry(prompt: string, parameters: GenerationParameters, maxRetries = 3): Promise<LLMResponse> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await this.generateResponse(prompt, parameters);
+    } catch (error) {
+      if (attempt === maxRetries) throw error;
+      
+      const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+}
 ```
-__tests__/
-├── components/       # Component tests
-├── utils/           # Utility function tests
-├── api/             # API integration tests
-└── __mocks__/       # Mock implementations
-```
-
 ## 🚀 Deployment
 
-### Build Process
+### Production Build
 ```bash
-npm run build        # Create production build
-npm run start        # Start production server
-```
-
-### Environment Variables
-
-#### Development (.env.local)
-```env
-NEXT_PUBLIC_API_URL=http://localhost:3001
-NEXT_PUBLIC_APP_NAME="AI Response Quality Analyzer"
-NEXT_PUBLIC_DEBUG=true
-```
-
-#### Production (.env.production)
-```env
-NEXT_PUBLIC_API_URL=https://api.yourdomain.com
-NEXT_PUBLIC_APP_NAME="AI Response Quality Analyzer"
-NEXT_PUBLIC_DEBUG=false
-NEXT_PUBLIC_GA_TRACKING_ID=your_ga_id
+npm run build    # Compile TypeScript
+npm run start    # Start production server
 ```
 
 ### Deployment Platforms
 
-#### Vercel (Recommended)
-1. Connect GitHub repository
-2. Set environment variables
-3. Deploy automatically on push
-
-#### Netlify
+#### Render
 1. Connect repository
 2. Configure build settings
 3. Set environment variables
 4. Deploy
-
-#### Self-Hosted
-1. Build the application: `npm run build`
-2. Serve static files with nginx/apache
-3. Configure reverse proxy to backend
-
-## 🔍 Performance Optimization
-
-### Built-in Optimizations
-- **Code Splitting**: Automatic with Next.js
-- **Image Optimization**: Next.js Image component
-- **Bundle Analysis**: `npm run analyze`
-- **Tree Shaking**: Dead code elimination
-
-### Custom Optimizations
-- **Lazy Loading**: Components loaded on demand
-- **Memoization**: Prevent unnecessary re-renders
-- **Debouncing**: API calls and user input
-- **Caching**: API response caching
-
-### Performance Monitoring
-- **Web Vitals**: Core web vitals tracking
-- **Bundle Size**: Monitor bundle size growth
-- **API Performance**: Track API response times
-- **User Experience**: Monitor loading states
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-#### Development Server Won't Start
-```bash
-# Check Node.js version
-node --version  # Should be 18+
-
-# Clear npm cache
-npm cache clean --force
-
-# Delete node_modules and reinstall
-rm -rf node_modules package-lock.json
-npm install
-```
-
-#### API Connection Issues
-- Verify backend is running on port 3001
-- Check `NEXT_PUBLIC_API_URL` environment variable
-- Test API endpoint: `curl http://localhost:3001/api/health`
-
-#### Build Errors
-```bash
-# Check TypeScript errors
-npm run type-check
-
-# Fix linting errors
-npm run lint:fix
-
-# Clear Next.js cache
-rm -rf .next
-npm run build
-```
-
-#### Styling Issues
-- Verify Tailwind CSS is properly configured
-- Check for conflicting CSS classes
-- Ensure responsive breakpoints are correct
-
-## 📚 Additional Resources
-
-### Documentation
-- [Next.js Documentation](https://nextjs.org/docs)
-- [React Documentation](https://react.dev/)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
-
-### Learning Resources
-- [Next.js Learn Course](https://nextjs.org/learn)
-- [React Tutorial](https://react.dev/learn)
-- [Tailwind CSS Tutorial](https://tailwindcss.com/docs/utility-first)
-
-### Community
-- [Next.js GitHub](https://github.com/vercel/next.js)
-- [React GitHub](https://github.com/facebook/react)
-- [Tailwind CSS GitHub](https://github.com/tailwindlabs/tailwindcss)
-
-## 🤝 Contributing
-
-### Development Setup
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Make your changes
-4. Run tests: `npm test`
-5. Commit changes: `git commit -m 'Add amazing feature'`
-6. Push to branch: `git push origin feature/amazing-feature`
-7. Open a Pull Request
-
-### Code Review Checklist
-- [ ] TypeScript types are properly defined
-- [ ] Components are accessible
-- [ ] Responsive design is implemented
-- [ ] Tests are included
-- [ ] Documentation is updated
-- [ ] Performance is considered
-
----
